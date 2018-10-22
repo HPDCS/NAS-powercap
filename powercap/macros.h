@@ -1,0 +1,2 @@
+#define DEBUG_HEURISTICS
+#define PRINT_STATS

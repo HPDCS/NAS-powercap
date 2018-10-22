@@ -1,0 +1,9 @@
+bt	class A,B	iter=2000	exploit_steps= 400
+cg	class B,C	iter=2000	exploit_steps= 400
+ft	class A,B	iter=2000	exploit_steps= 400
+is	class A,B	iter=2000	exploit_steps= 400
+lu	class A,B	iter=2000	exploit_steps= 400
+mg	class A=B,C	iter=2000	exploit_steps= 400
+is	class B,C	iter=2000	exploit_steps= 400
+ua	class B,C	iter=2000	exploit_steps= 400
+
