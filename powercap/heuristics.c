@@ -625,7 +625,7 @@ void model_power_throughput(double throughput, double power){
 		best_throughput = throughput_model[max_pstate][1];
 
 		for(i = 1; i <= max_pstate; i++){
-			for(j = i; j <= total_threads; j++){
+			for(j = 1; j <= total_threads; j++){
 				if(power_model[i][j] < power_limit && throughput_model[i][j] > best_throughput){
 					best_pstate = i;
 					best_threads = j;
@@ -741,7 +741,7 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "Throughput error percentage\n");
 					for(i = 2; i < max_pstate; i++){
 						for (j = 1; j <= total_threads; j++){
-							fprintf(model_validation_file, "%lf\t", (100*abs(throughput_validation[i][j]-throughput_real[i][j]))/throughput_real[i][j]);
+							fprintf(model_validation_file, "%lf\t", (100*(throughput_validation[i][j]-throughput_real[i][j]))/throughput_real[i][j]);
 						}
 						fprintf(model_validation_file, "\n");
 					}
@@ -769,7 +769,7 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "power error percentage\n");
 					for(i = 2; i < max_pstate; i++){
 						for (j = 1; j <= total_threads; j++){
-							fprintf(model_validation_file, "%lf\t", (100*abs(power_validation[i][j]-power_real[i][j]))/power_real[i][j]);
+							fprintf(model_validation_file, "%lf\t", (100*(power_validation[i][j]-power_real[i][j]))/power_real[i][j]);
 						}
 						fprintf(model_validation_file, "\n");
 					}
