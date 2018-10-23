@@ -39,6 +39,9 @@ int heuristic_mode;				// Used to switch between different heuristics mode. Chec
 int detection_mode; 			// Defines the detection mode. Value 0 means detection is disabled. 1 restarts the exploration from the start. Detection mode 2 resets the execution after a given number of steps
 int exploit_steps;				// Number of steps that should be waited until the next exploration is started
 double power_uncore;			// System specific parameter that defines the amount of power consumption used by the uncore part of the system, which we consider to be constant
+int min_cpu_freq;			// Minimum cpu frequency (in KHz)	
+int max_cpu_freq;			// Maximum cpu frequency (in KHz)
+int boost_disabled;			// Disable turbo-boost 
 
 // Variable specific to NET_STATS
 long net_time_sum;

@@ -86,6 +86,64 @@ int init_DVFS_management(){
   	current_pstate = -1;
   	set_pstate(max_pstate);
 
+	set_boost(boost_disabled);
+
+	return 0;
+}
+
+// Sets the governor to userspace and sets the highest frequency
+int init_DVFS_management_intel_pstate_passive_mode(){
+	
+	char fname[64];
+	char* freq_available;
+	int frequency, i;
+	FILE* governor_file;
+
+	//Set governor to userspace
+	nb_cores = sysconf(_SC_NPROCESSORS_ONLN);
+	printf("Number of available cores: %i\n ", nb_cores);	
+	for(i=0; i<nb_cores;i++){
+		sprintf(fname, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", i);
+		governor_file = fopen(fname,"w+");
+		if(governor_file == NULL){
+			printf("Error opening cpu%d scaling_governor file. Must be superuser\n", i);
+			exit(0);		
+		}		
+		fprintf(governor_file, "userspace");
+		fflush(governor_file);
+		fclose(governor_file);
+	}
+
+	// Init array of available frequencies
+
+	pstate = malloc(sizeof(int)*32);
+	i = (max_cpu_freq-min_cpu_freq)/100000+1; 
+	char * end;
+	printf("\nCreating Cpu frequency list with %i p-states\n",i);
+	max_pstate = --i;
+	frequency=min_cpu_freq;
+	while(frequency<max_cpu_freq) {
+		pstate[i]=frequency;
+		printf(" %i",pstate[i]);
+		freq_available = end;
+  		frequency+=100000;
+		i--;
+	}
+	//set pstate 0
+	if (boost_disabled) frequency-=100000;
+	pstate[i]=frequency;
+	printf(" %i",pstate[i]);
+	freq_available = end;
+
+	printf("\nCpu frequency list completed\n");
+
+	#ifdef DEBUG_HEURISTICS
+  		printf("Created %d p-states in the range from %d MHz to %d MHz\n", max_pstate+1, pstate[max_pstate]/1000, pstate[0]/1000);
+  	#endif
+ 
+  	current_pstate = -1;
+  	set_pstate(max_pstate);
+
 	return 0;
 }
 
@@ -194,23 +252,11 @@ void load_config_file(){
 		printf("Error opening powercap_config configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf", 
-			 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore)!=8) {
+	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d", 
+			 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled)!=11) {
 		printf("The number of input parameters of the configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}
-
-  	// Necessary for the static execution in order to avoid running for the first step with a different frequency than manually set in hope_config.txt
-  	if(heuristic_mode == 8){
-  		if(static_pstate >= 0 && static_pstate <= max_pstate)
-  			set_pstate(static_pstate);
-  		else 
-  			printf("The parameter manual_pstate is set outside of the valid range for this CPU. Setting the CPU to the slowest frequency/voltage\n");
-  	}else if(heuristic_mode == 12 || heuristic_mode == 13 || heuristic_mode == 15){
-  		set_pstate(max_pstate);
-  		starting_threads = 1;
-  	}
-
 	fclose(config_file);
 }
 
@@ -348,6 +394,10 @@ void init_global_variables(){
 	max_thread_search_throughput = -1;
 
 	validation_pstate = max_pstate-1;
+	#ifdef DEBUG_HEURISTICS
+		printf("Global variables initialized\n");
+fflush(stdout);
+	#endif
 }
 
 
@@ -364,6 +414,10 @@ void set_boost(int value){
 	}
 	
 	boost_file = fopen("/sys/devices/system/cpu/cpufreq/boost", "w+");
+	if(boost_file == NULL){
+		printf("Error opening boost_file\n", i);
+		exit(0);		
+	}
 	fprintf(boost_file, "%d", value);
 	fflush(boost_file);
 	fclose(boost_file);
@@ -382,12 +436,23 @@ void powercap_init(int threads){
 		printf("CREATE called\n");
 	#endif
 
-	init_DVFS_management();
+	load_config_file();
+	init_DVFS_management_intel_pstate_passive_mode();
 	init_thread_management(threads);
 	init_stats_array_pointer(threads);
-	load_config_file();
-	init_global_variables();
-	set_boost(1);
+	init_global_variables();	
+
+  	// Necessary for the static execution in order to avoid running for the first step with a different frequency than manually set in hope_config.txt
+  	if(heuristic_mode == 8){
+  		if(static_pstate >= 0 && static_pstate <= max_pstate)
+  			set_pstate(static_pstate);
+  		else 
+  			printf("The parameter manual_pstate is set outside of the valid range for this CPU. Setting the CPU to the slowest frequency/voltage\n");
+  	}else if(heuristic_mode == 12 || heuristic_mode == 13 || heuristic_mode == 15){
+  		set_pstate(max_pstate);
+  		starting_threads = 1;
+  	}
+
 	if(heuristic_mode == 15)
 		init_model_matrices();
 
