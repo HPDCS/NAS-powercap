@@ -694,7 +694,7 @@ void heuristic(double throughput, double power, long time){
 			steps++;
 
 		#ifdef DEBUG_HEURISTICS
-			printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
+			printf("Switched to %d threads/cores - pstate %d\n", active_threads, current_pstate);
 		#endif 
 	}
 	else{	// Workload change detection

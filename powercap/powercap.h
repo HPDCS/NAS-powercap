@@ -42,6 +42,7 @@ double power_uncore;			// System specific parameter that defines the amount of p
 int min_cpu_freq;			// Minimum cpu frequency (in KHz)	
 int max_cpu_freq;			// Maximum cpu frequency (in KHz)
 int boost_disabled;			// Disable turbo-boost 
+int core_packing;			// 0-> threads scheduling, 1 -> core packing
 
 // Variable specific to NET_STATS
 long net_time_sum;

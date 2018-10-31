@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <sched.h>
 #include "heuristics.c"
+#include <omp.h>
 
 int set_pstate(int input_pstate){
 	
@@ -185,27 +186,35 @@ void init_thread_management(int threads){
 // Function used to set the number of running threads. Based on active_threads and threads might wake up or pause some threads 
 void set_threads(int to_threads){
 
-
 	if(to_threads < 1 || to_threads > total_threads){
-		printf("Setting threads to %d which is invalid for this system\n", to_threads);
+		printf("Setting threads/cores to %d which is invalid for this system\n", to_threads);
 		exit(1);
 	}
 
-	int i;
+	if (core_packing) {
 
-	cpu_set_t cpu_set;       
-	CPU_ZERO(&cpu_set);
-	for(i=0; i<to_threads; i++){
-		CPU_SET(i, &cpu_set);
+		#ifdef DEBUG_HEURISTICS
+		printf("Packing to %d cores\n", to_threads);
+		#endif
+		int i;
+
+		cpu_set_t cpu_set;       
+		CPU_ZERO(&cpu_set);
+		for(i=0; i<to_threads; i++){
+			CPU_SET(i, &cpu_set);
+		}
+	
+		for(i = 0; i < total_threads;i++){
+			pthread_setaffinity_np(pthread_ids[i], sizeof(cpu_set_t), &cpu_set); 
+		}
+		
+	} else {
+		#ifdef DEBUG_HEURISTICS
+		printf("Scheduling %d threads\n", to_threads);
+		#endif
+		//omp_set_dynamic(0);     // Explicitly disable dynamic teams
+		omp_set_num_threads(to_threads);
 	}
-
-	for(i = 0; i < total_threads;i++){
-		pthread_setaffinity_np(pthread_ids[i], sizeof(cpu_set_t), &cpu_set); 
-	}
-
-	#ifdef DEBUG_HEURISTICS
-		printf("Setting threads to %d\n", to_threads);
-	#endif
 
 	active_threads = to_threads;
 }
@@ -252,8 +261,8 @@ void load_config_file(){
 		printf("Error opening powercap_config configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d", 
-			 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled)!=11) {
+	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d CORE_PACKING=%d", 
+			 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing)!=12) {
 		printf("The number of input parameters of the configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}
@@ -760,7 +769,7 @@ name-heuristic_mode-powercapvalue
 	// get executable name
 	if (!subString (__progname, 0, 2, execName))
 	{
-  		printf("\nError reainf executable name. Exiting...");
+  		printf("\nError reading executable name. Exiting...\n");
 		exit(1);
 	}
 	
@@ -769,12 +778,12 @@ name-heuristic_mode-powercapvalue
 	else 
 		sprintf(fileName, "%s-%i-%i.txt", execName, heuristic_mode, (int)power_limit);
 	
-	printf ("\nWrinting stats to file: %s", fileName);
+	printf ("\nWrinting stats to file: %s\n", fileName);
 	fflush(stdout);
 	
 	int fd = fopen(fileName, "a");
 	if(fd==NULL) {
-		printf("\nError opening output file. Exiting...");
+		printf("\nError opening output file. Exiting...\n");
     		exit(1);
   	}
 
