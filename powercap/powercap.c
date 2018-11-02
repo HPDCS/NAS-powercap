@@ -446,7 +446,7 @@ void powercap_init(int threads){
 	#endif
 
 	load_config_file();
-	init_DVFS_management_intel_pstate_passive_mode();
+	init_DVFS_management();
 	init_thread_management(threads);
 	init_stats_array_pointer(threads);
 	init_global_variables();	
