@@ -714,11 +714,12 @@ void heuristic(double throughput, double power, long time){
 					
 					// Do not restart the exploration/model setup
 					detection_mode = 0;
-
+					double t;
 					// Print validation results to file
 					FILE* model_validation_file = fopen("model_validation.txt","w+");
-					int i,j = 0;
-
+					int i,j, total_confgurations_for_thr_mre=0, total_confgurations_for_pow_mre = 0;
+					double throughput_re, throughput_abs_re_sum=0;
+					double power_re, power_abs_re_sum=0;
 					// Write real, predicted and error for throughput to file
 					fprintf(model_validation_file, "Real throughput\n");
 					for(i = 2; i < max_pstate; i++){
@@ -741,7 +742,10 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "Throughput error percentage\n");
 					for(i = 2; i < max_pstate; i++){
 						for (j = 1; j <= total_threads; j++){
-							fprintf(model_validation_file, "%lf\t", (100*(throughput_validation[i][j]-throughput_real[i][j]))/throughput_real[i][j]);
+							throughput_re=(throughput_validation[i][j]-throughput_real[i][j])/throughput_real[i][j];
+							fprintf(model_validation_file, "%lf\t", 100*throughput_re);
+							throughput_abs_re_sum+=fabs(throughput_re);
+							total_confgurations_for_thr_mre++;							
 						}
 						fprintf(model_validation_file, "\n");
 					}
@@ -767,15 +771,27 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "\n");
 
 					fprintf(model_validation_file, "power error percentage\n");
-					for(i = 2; i < max_pstate; i++){
+					for(i = 2; i < max_pstate; i++){						
 						for (j = 1; j <= total_threads; j++){
-							fprintf(model_validation_file, "%lf\t", (100*(power_validation[i][j]-power_real[i][j]))/power_real[i][j]);
+							power_re=(power_validation[i][j]-power_real[i][j])/power_real[i][j];
+							fprintf(model_validation_file, "%lf\t", 100*power_re);
+							power_abs_re_sum+=fabs(power_re);
+							total_confgurations_for_pow_mre++;
 						}
 						fprintf(model_validation_file, "\n");
 					}
 					fprintf(model_validation_file, "\n");
-
 					fclose(model_validation_file);
+
+					FILE* model_percent_mre = fopen("model_percent_mre.txt","w+");
+						fprintf(model_percent_mre, "%lf\n", throughput_abs_re_sum/(double) total_confgurations_for_thr_mre*(double)100);
+					fclose(model_percent_mre);
+
+					FILE* power_percent_mre = fopen("power_percent_mre.txt","w+");
+						fprintf(power_percent_mre, "%lf\n", power_abs_re_sum/(double) total_confgurations_for_pow_mre*(double)100);
+					fclose(model_percent_mre);
+
+
 
 					#ifdef DEBUG_HEURISTICS
 						printf("Model validation completed\n");

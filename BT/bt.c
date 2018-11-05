@@ -47,7 +47,7 @@
 #include "print_results.h"
 
 // start powercap code
-#include "../powercap/powercap.h"
+// #include "../powercap/powercap.h"
 // end powercap code
 
 /* common /global/ */
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
   int j;
   #pragma omp parallel for default(shared) private(j)
   for (j = 0; j < omp_get_max_threads(); j++) {
-    powercap_init_thread();
+   powercap_init_thread();
   }
   // end powercap code
 
