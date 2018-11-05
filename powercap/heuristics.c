@@ -1,6 +1,8 @@
 #include "powercap.h"
 #include "math.h"
 
+
+
 ///////////////////////////////////////////////////////////////
 // Utility functions
 ///////////////////////////////////////////////////////////////
@@ -647,6 +649,15 @@ void model_power_throughput(double throughput, double power){
 	} 
 }
 
+char* subString (const char* input, int offset, int len, char* dest){
+	int input_len = strlen (input);
+	if (offset + len > input_len){
+     		return NULL;
+  	}
+	strncpy(dest, input + offset, len);
+  	return dest;
+}
+
 ///////////////////////////////////////////////////////////////
 // Main heuristic function
 ///////////////////////////////////////////////////////////////
@@ -716,7 +727,16 @@ void heuristic(double throughput, double power, long time){
 					detection_mode = 0;
 					double t;
 					// Print validation results to file
-					FILE* model_validation_file = fopen("model_validation.txt","w+");
+
+					extern char *__progname;
+					char output_filename[32];
+
+					sprintf(output_filename, "%s-model_validation.txt", __progname);
+	
+					printf ("\nWrinting model_validation data to file: %s\n", output_filename);
+					fflush(stdout);
+
+					FILE* model_validation_file = fopen(output_filename,"w+");
 					int i,j, total_confgurations_for_thr_mre=0, total_confgurations_for_pow_mre = 0;
 					double throughput_re, throughput_abs_re_sum=0;
 					double power_re, power_abs_re_sum=0;
@@ -783,11 +803,15 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "\n");
 					fclose(model_validation_file);
 
-					FILE* model_percent_mre = fopen("model_percent_mre.txt","w+");
+					sprintf(output_filename, "%s-model_percent_mre.txt", __progname);
+
+					FILE* model_percent_mre = fopen(output_filename,"w+");
 						fprintf(model_percent_mre, "%lf\n", throughput_abs_re_sum/(double) total_confgurations_for_thr_mre*(double)100);
 					fclose(model_percent_mre);
 
-					FILE* power_percent_mre = fopen("power_percent_mre.txt","w+");
+					sprintf(output_filename, "%s-power_percent_mre.txt", __progname);
+
+					FILE* power_percent_mre = fopen(output_filename,"w+");
 						fprintf(power_percent_mre, "%lf\n", power_abs_re_sum/(double) total_confgurations_for_pow_mre*(double)100);
 					fclose(model_percent_mre);
 

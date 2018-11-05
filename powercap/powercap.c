@@ -9,6 +9,7 @@
 #include "heuristics.c"
 #include <omp.h>
 
+
 int set_pstate(int input_pstate){
 	
 	int i;
@@ -740,43 +741,19 @@ void powercap_commit_work(){
 	}
 }
 
-char* subString (const char* input, int offset, int len, char* dest){
-	int input_len = strlen (input);
-	if (offset + len > input_len){
-     		return NULL;
-  	}
-	strncpy(dest, input + offset, len);
-  	return dest;
-}
+
 
 
 void powercap_print_stats(){
 
 extern char *__progname;
-char execName[2];
-char fileName[12];
 
-/*
-euristica 8
-1 file per bench
-name-current_pstate-active_threads
+char fileName[32];
 
-altre euristiche
-1 file per configurazione
-name-heuristic_mode-powercapvalue
-*/
-
-	// get executable name
-	if (!subString (__progname, 0, 2, execName))
-	{
-  		printf("\nError reading executable name. Exiting...\n");
-		exit(1);
-	}
-	
 	if (heuristic_mode==8)
-		sprintf(fileName, "%s-%i-%i.txt", execName, current_pstate, active_threads);
+		sprintf(fileName, "%s-%i-%i.txt", __progname, current_pstate, active_threads);
 	else 
-		sprintf(fileName, "%s-%i-%i.txt", execName, heuristic_mode, (int)power_limit);
+		sprintf(fileName, "%s-%i-%i.txt", __progname, heuristic_mode, (int)power_limit);
 	
 	printf ("\nWrinting stats to file: %s\n", fileName);
 	fflush(stdout);
