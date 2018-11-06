@@ -13,7 +13,8 @@
 ////////////////////////////////////////////////////////////////////////
 
 pthread_t* pthread_ids; // Array of pthread id's to be used with signals
-int total_threads;				// Total number of threads that could be used by the transcational operation 
+int nas_total_threads;			// Total number of threads init by NAS benchmark.
+int total_threads;				// Total number of threads supported by the module. Should be 1 less than nas_total_threads
 volatile int active_threads;	// Number of currently active threads, reflects the number of 1's in running_array
 int nb_cores; 					// Number of cores. Detected at startup and used to set DVFS parameters for all cores
 int nb_packages;				// Number of system package. Necessary to monitor energy consumption of all packages in the system

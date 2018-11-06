@@ -158,14 +158,16 @@ void init_thread_management(int threads){
 	int i;
 
 	// Init total threads and active threads
-	total_threads = threads;
+	nas_total_threads = threads;
+	total_threads = threads - 1;
 
 	#ifdef DEBUG_HEURISTICS
-		printf("Set total_threads to %d\n", threads);
+		printf("Set nas_total_threads to %d\n", nas_total_threads);
+		printf("Set total_threads to %d\n", total_threads);
 	#endif
 
 	active_threads = total_threads;
-	pthread_ids = malloc(sizeof(pthread_t)*total_threads);
+	pthread_ids = malloc(sizeof(pthread_t)*nas_total_threads);
 
 	//init number of packages
 	filename = malloc(sizeof(char)*64); 
@@ -205,7 +207,7 @@ void set_threads(int to_threads){
 			CPU_SET(i, &cpu_set);
 		}
 	
-		for(i = 0; i < total_threads;i++){
+		for(i = 0; i < nas_total_threads;i++){
 			pthread_setaffinity_np(pthread_ids[i], sizeof(cpu_set_t), &cpu_set); 
 		}
 		
@@ -516,8 +518,11 @@ void powercap_init_thread(){
 	__atomic_fetch_add(&initialized_thread_counter, 1, __ATOMIC_SEQ_CST);
 
 	// Wait for all threads to get initialized
-	while(initialized_thread_counter < total_threads){}
+	while(initialized_thread_counter < nas_total_threads){}
 	
+	if(id == 0)
+		set_threads(active_threads);
+
 	#ifdef DEBUG_HEURISTICS
 		if(id == 0){
 			printf("Initialized all thread ids\n");
