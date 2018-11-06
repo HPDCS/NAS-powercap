@@ -262,11 +262,23 @@ void load_config_file(){
 		printf("Error opening powercap_config configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d CORE_PACKING=%d", 
-			 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing)!=12) {
+	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d CORE_PACKING=%d EXTRA_RANGE_PERCENTAGE=%lf WINDOW_SIZE=%d HYSTERESIS=%lf ", 
+			 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing, &extra_range_percentage, &window_size, &hysteresis)!=15) {
 		printf("The number of input parameters of the configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}
+
+	if(extra_range_percentage < 0 || extra_range_percentage > 100){
+	  		printf("Extra_range_percentage value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
+	  		exit(1);
+	  	}
+
+
+	if(hysteresis < 0 || hysteresis > 100){
+	  	printf("Hysteresis value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
+	  	exit(1);
+	}
+
 	fclose(config_file);
 }
 
@@ -380,9 +392,18 @@ void init_global_variables(){
 	barrier_detected = 0;
 	pre_barrier_threads = 0;
 
+
+	high_throughput = -1;
+	high_threads = -1;
+	high_pstate = -1;
+
 	best_throughput = -1;
 	best_pstate = -1;
 	best_threads = -1;
+
+	low_throughput = -1;
+	low_threads = -1;
+	low_pstate = -1;
 
 	net_time_sum = 0;
     net_energy_sum = 0;

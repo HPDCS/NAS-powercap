@@ -66,6 +66,20 @@ void stop_searching(){
 		set_threads(best_threads);
     }
 
+    if(heuristic_mode == 15 && detection_mode == 2){
+
+    	high_threads = best_threads;
+    	low_threads = best_threads;
+    	
+    	if(best_pstate > 0)
+    		high_pstate = best_pstate - 1;
+    	else high_pstate = best_pstate;
+
+    	if(best_pstate < max_pstate)
+    		low_pstate = best_pstate+1;
+    	else low_pstate = best_pstate;
+    }
+
 	#ifdef DEBUG_HEURISTICS
 		printf("EXPLORATION COMPLETED IN %d STEPS. OPTIMAL: %d THREADS P-STATE %d\n", steps, best_threads, best_pstate);
 	#endif
@@ -251,6 +265,191 @@ void dynamic_heuristic0(double throughput, double power){
 			}
 		}
 	}
+}
+
+// Utility function used for updating the values of the HIGH configurations
+void update_high(double throughput, double power){
+
+	if(power < power_limit*(1+(extra_range_percentage/100)) && throughput > high_throughput){
+		high_throughput = throughput; 
+		high_pstate = current_pstate;
+		high_threads = active_threads;
+		high_power = power;
+	} 
+}
+
+// Utility function used for updating the values of the HIGH configurations
+void update_low(double throughput, double power){
+
+	if( power < power_limit*(1-(extra_range_percentage/100/2)) && throughput > low_throughput){
+		low_throughput = throughput; 
+		low_pstate = current_pstate;
+		low_threads = active_threads; 
+		low_power = power;
+	}
+}
+
+// Called by heuristics in-between exploration procedures or model resets
+void perform_fluctuation(double throughput, double power, long time){
+
+	if(fluctuation_state == -1){
+		low_power = power;
+		low_throughput = throughput;
+	}
+	else if (fluctuation_state == 0){
+		best_power = power;
+		best_throughput = throughput;
+	}
+	else if (fluctuation_state == 1){
+		high_power = power;
+		high_throughput = throughput;
+	}
+	else{
+		printf("Invalid value of fluctuation_state. Aborting execution\n");
+		exit(1);
+	}
+
+	//Update window_power, window_time and update current_window_slot
+	window_power = (window_power*window_time+time*power)/(time+window_time);
+	window_time+=time;
+	current_window_slot++;
+
+	#ifdef DEBUG_HEURISTICS
+		printf("Window_power = %lf - Slot = %d - Fluctuation_state = %d\n", window_power, current_window_slot, fluctuation_state);
+	#endif
+
+
+	if(current_window_slot == window_size){ // Last slot in the current window 
+
+		if(window_power < power_limit && best_power < power_limit && high_pstate > 0 && best_pstate > 0 && low_pstate > 0){
+			high_pstate = high_pstate-1;
+			best_pstate = best_pstate-1;
+			low_pstate = low_pstate-1;
+		} else if (window_power > power_limit && low_throughput > 0 && low_power > power_limit && low_pstate < max_pstate && best_pstate < max_pstate && high_pstate < max_pstate){
+			high_pstate = high_pstate+1;
+			best_pstate = best_pstate+1;
+			low_pstate = low_pstate+1;
+		} else if (low_throughput <= 0){
+			if(best_pstate ==  max_pstate)
+				low_pstate = best_pstate;
+			else low_pstate = best_pstate+1;
+			low_threads = best_threads;
+			low_throughput = best_throughput;
+		}
+		else{
+			if(high_throughput < best_throughput || (best_threads == high_threads && best_pstate == high_pstate)){
+				if(best_pstate != 0 )
+					high_pstate = best_pstate-1;
+				else high_pstate = best_pstate;
+				high_threads = best_threads;
+				high_throughput = throughput;
+			}
+
+			if(low_throughput == 0 || (best_threads == low_threads && best_pstate == low_pstate)){
+				if(best_pstate != max_pstate && best_power > power_limit)
+					low_pstate = best_pstate+1;
+				else low_pstate = best_pstate;
+				low_threads = best_threads;
+				low_throughput = best_throughput;
+			}
+		}
+
+		set_threads(best_threads);
+		set_pstate(best_pstate);
+		fluctuation_state = 0;
+
+		window_time = 0;
+		window_power = 0;
+		current_window_slot = 0;
+
+
+
+		#ifdef DEBUG_HEURISTICS
+			printf(" - Next configuration = BEST (restart)\n");
+			printf("BEST - threads %d - pstate %d - power %lf\n", best_threads, best_pstate, best_power);
+			printf("HIGH - threads %d - pstate %d - power %lf\n", high_threads, high_pstate, high_power);
+			printf("LOW - threads %d - pstate %d - power %lf\n", low_threads, low_pstate, low_power);
+		#endif
+	}
+	else{ // Regular slot, should decide configuration for next step 
+		if(window_power < power_limit*(1-hysteresis/100)){	// Should increase_window_power
+			if(best_power > power_limit || (high_throughput == -1)){
+				set_threads(best_threads);
+				set_pstate(best_pstate);
+				fluctuation_state = 0;
+				
+				#ifdef DEBUG_HEURISTICS
+					printf(" - Next configuration = BEST\n");
+				#endif
+			}
+			else {
+				set_threads(high_threads);
+				set_pstate(high_pstate);
+				fluctuation_state = 1;
+
+				#ifdef DEBUG_HEURISTICS
+					printf(" - Next configuration = HIGH\n");
+				#endif
+			}
+		}else if (window_power > power_limit*(1+hysteresis/100)){ // Should decrease window_power
+			if(best_power < power_limit || (low_throughput == -1)){
+				set_threads(best_threads);
+				set_pstate(best_pstate);
+				fluctuation_state = 0;
+
+				#ifdef DEBUG_HEURISTICS
+					printf(" - Next configuration = BEST\n");
+				#endif
+			}
+			else {
+				set_threads(low_threads);
+				set_pstate(low_pstate);
+				fluctuation_state = -1;
+
+				#ifdef DEBUG_HEURISTICS
+					printf(" - Next configuration = LOW\n");
+				#endif
+			}
+		}
+		else{	// Window_power is within the hysteresis variation of window_power
+			if(high_power < power_limit*(1+hysteresis/100) && high_throughput != -1){
+				set_threads(high_threads);
+				set_pstate(high_pstate);
+				fluctuation_state = 1;
+
+				#ifdef DEBUG_HEURISTICS
+					printf(" - Next configuration = HIGH (hysteresis)\n");
+				#endif
+			}else if(best_power < power_limit*(1+hysteresis/100) || low_throughput == -1){
+				set_threads(best_threads);
+				set_pstate(best_pstate);
+				fluctuation_state = 0;
+
+				#ifdef DEBUG_HEURISTICS
+					printf(" - Next configuration = BEST (hysteresis)\n");
+				#endif
+			}else{
+				set_threads(low_threads);
+				set_pstate(low_pstate);
+				fluctuation_state = -1;
+
+				#ifdef DEBUG_HEURISTICS
+					printf(" - Next configuration = LOW (hysteresis)\n");
+				#endif
+			}
+		}	
+	}	
+}
+
+// Evolution of heuristic0 that saves 3 distinct configurations to be alternated in the exploitation phase.
+// This alternation allows to simulate a virtual configuration that has a power consumption as close as possible to the cap and increases the capability of adapting during noisy explorations 
+void dynamic_heuristic1(double throughput, double power){
+
+	update_high(throughput, power); 
+	update_low(throughput, power); 
+
+	// Call basic dynamic heuristic
+	dynamic_heuristic0(throughput, power);
 }
 
 void update_highest_threads(double throughput, double power){
@@ -680,6 +879,9 @@ void heuristic(double throughput, double power, long time){
 			case 9:	// Dynamic heuristic0
 				dynamic_heuristic0(throughput, power);
 				break;
+			case 10: 
+				dynamic_heuristic1(throughput, power);
+				break;
 			case 11:
 				heuristic_highest_threads(throughput, power);
 				break;
@@ -877,6 +1079,21 @@ void heuristic(double throughput, double power, long time){
 				best_threads = -1;
 				best_power = -1;
 
+				high_throughput = -1;
+				high_pstate = -1;
+				high_threads = -1;
+				high_power = -1;
+
+				low_throughput = -1;
+				low_pstate = -1;
+				low_threads = -1;
+				low_power = -1;
+
+				fluctuation_state = 0;
+				window_time = 0;
+				window_power = 0;
+				current_window_slot = 0;
+
 				stopped_searching = 0;
 
 				min_thread_search = 1;
@@ -887,6 +1104,10 @@ void heuristic(double throughput, double power, long time){
 
 				min_thread_search_throughput = -1;
 				max_thread_search_throughput = -1;
+			}
+
+			if((heuristic_mode == 10 || heuristic_mode == 15) && stopped_searching){
+				perform_fluctuation(throughput, power, time);
 			}
 		}
 	}

@@ -43,6 +43,9 @@ int min_cpu_freq;			// Minimum cpu frequency (in KHz)
 int max_cpu_freq;			// Maximum cpu frequency (in KHz)
 int boost_disabled;			// Disable turbo-boost 
 int core_packing;			// 0-> threads scheduling, 1 -> core packing
+double extra_range_percentage;	// Defines the range in percentage over power_limit which is considered valid for the HIGH and LOW configurations. Used by dynamic_heuristic1. Defined in hope_config.txt
+int window_size; 				// Defines the lenght of the window, defined in steps, that should achieve a power consumption within power_limit. Used by dynamic_heuristic1. Defined in hope_config.txt 
+double hysteresis;				// Defines the amount in percentage of hysteresis that should be applied when deciding the next step in a window based on the current value of window_power. Used by dynamic_heuristic1. Defined in hope_config.txt
 
 // Variable specific to NET_STATS
 long net_time_sum;
@@ -84,6 +87,20 @@ int min_thread_search;
 int max_thread_search;
 double min_thread_search_throughput;
 double max_thread_search_throughput;
+
+// Variables specific to dynamic_heuristic1 
+double high_throughput;
+int high_pstate;
+int high_threads; 
+double high_power;
+double low_throughput; 
+int low_pstate;
+int low_threads; 
+double low_power;
+int current_window_slot;		// Current slot within the window
+double window_time;				// Expressed in nano seconds. Defines the current sum of time passed in the current window of configuration fluctuation
+double window_power; 			// Expressed in Watt. Current average power consumption of the current fluctuation window
+int fluctuation_state;			// Defines the configuration used during the last step, -1 for LOW, 0 for BEST, 1 for HIGH
 
 
 // Model-based variables
