@@ -18,7 +18,7 @@ int set_pstate(int input_pstate){
 	
 	if(input_pstate > max_pstate)
 		return -1;
-		
+	
 	if(current_pstate != input_pstate){
 		int frequency = pstate[input_pstate];
 
@@ -76,17 +76,17 @@ int init_DVFS_management(){
 	for (frequency = strtol(freq_available, &end, 10); freq_available != end; frequency = strtol(freq_available, &end, 10)){
 		pstate[i]=frequency;
 		freq_available = end;
-  		i++;
+		i++;
 	}
-  	max_pstate = --i;
+	max_pstate = --i;
 
 	#ifdef DEBUG_HEURISTICS
-  		printf("Found %d p-states in the range from %d MHz to %d MHz\n", max_pstate, pstate[max_pstate]/1000, pstate[0]/1000);
+	printf("Found %d p-states in the range from %d MHz to %d MHz\n", max_pstate, pstate[max_pstate]/1000, pstate[0]/1000);
   	#endif
-  	fclose(available_freq_file);
+	fclose(available_freq_file);
 
-  	current_pstate = -1;
-  	set_pstate(max_pstate);
+	current_pstate = -1;
+	set_pstate(max_pstate);
 
 	set_boost(boost_disabled);
 
@@ -128,7 +128,7 @@ int init_DVFS_management_intel_pstate_passive_mode(){
 		pstate[i]=frequency;
 		printf(" %i",pstate[i]);
 		freq_available = end;
-  		frequency+=100000;
+		frequency+=100000;
 		i--;
 	}
 	//set pstate 0
@@ -140,11 +140,11 @@ int init_DVFS_management_intel_pstate_passive_mode(){
 	printf("\nCpu frequency list completed\n");
 
 	#ifdef DEBUG_HEURISTICS
-  		printf("Created %d p-states in the range from %d MHz to %d MHz\n", max_pstate+1, pstate[max_pstate]/1000, pstate[0]/1000);
+	printf("Created %d p-states in the range from %d MHz to %d MHz\n", max_pstate+1, pstate[max_pstate]/1000, pstate[0]/1000);
   	#endif
- 
-  	current_pstate = -1;
-  	set_pstate(max_pstate);
+	
+	current_pstate = -1;
+	set_pstate(max_pstate);
 
 	return 0;
 }
@@ -162,8 +162,8 @@ void init_thread_management(int threads){
 	total_threads = threads - 1;
 
 	#ifdef DEBUG_HEURISTICS
-		printf("Set nas_total_threads to %d\n", nas_total_threads);
-		printf("Set total_threads to %d\n", total_threads);
+	printf("Set nas_total_threads to %d\n", nas_total_threads);
+	printf("Set total_threads to %d\n", total_threads);
 	#endif
 
 	active_threads = total_threads;
@@ -181,7 +181,7 @@ void init_thread_management(int threads){
 	nb_packages = package_last_core+1;
 
 	#ifdef DEBUG_HEURISTICS
-		printf("Number of packages detected: %d\n", nb_packages);
+	printf("Number of packages detected: %d\n", nb_packages);
 	#endif
 }
 
@@ -206,7 +206,7 @@ void set_threads(int to_threads){
 		for(i=0; i<to_threads; i++){
 			CPU_SET(i, &cpu_set);
 		}
-	
+		
 		for(i = 0; i < nas_total_threads;i++){
 			pthread_setaffinity_np(pthread_ids[i], sizeof(cpu_set_t), &cpu_set); 
 		}
@@ -231,7 +231,7 @@ void init_stats_array_pointer(int threads){
 	cache_line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
 
 	#ifdef DEBUG_HEURISTICS
-		printf("D1 cache line size: %d bytes\n", cache_line_size);
+	printf("D1 cache line size: %d bytes\n", cache_line_size);
 	#endif
 }
 
@@ -242,17 +242,17 @@ stats_t* alloc_stats_buffer(int thread_number){
 
 	int ret = posix_memalign(((void**) &stats_ptr), cache_line_size, sizeof(stats_t));
 	if ( ret != 0 ){ printf("Error allocating stats_t for thread %d\n", thread_number);
-		exit(0);
-	}
+	exit(0);
+}
 
-	stats_ptr->total_commits = total_commits_round/active_threads;
-	stats_ptr->commits = 0;
-	stats_ptr->start_energy = 0;
-	stats_ptr->start_time = 0;
+stats_ptr->total_commits = total_commits_round/active_threads;
+stats_ptr->commits = 0;
+stats_ptr->start_energy = 0;
+stats_ptr->start_time = 0;
 
-	stats_array[thread_number] = stats_ptr;
+stats_array[thread_number] = stats_ptr;
 
-	return stats_ptr;
+return stats_ptr;
 }
 
 
@@ -265,23 +265,23 @@ void load_config_file(){
 		exit(1);
 	}
 	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d CORE_PACKING=%d EXTRA_RANGE_PERCENTAGE=%lf WINDOW_SIZE=%d HYSTERESIS=%lf ", 
-			 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing, &extra_range_percentage, &window_size, &hysteresis)!=15) {
+		&starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing, &extra_range_percentage, &window_size, &hysteresis)!=15) {
 		printf("The number of input parameters of the configuration file does not match the number of required parameters.\n");
-		exit(1);
-	}
+	exit(1);
+}
 
-	if(extra_range_percentage < 0 || extra_range_percentage > 100){
-	  		printf("Extra_range_percentage value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
-	  		exit(1);
-	  	}
+if(extra_range_percentage < 0 || extra_range_percentage > 100){
+	printf("Extra_range_percentage value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
+	exit(1);
+}
 
 
-	if(hysteresis < 0 || hysteresis > 100){
-	  	printf("Hysteresis value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
-	  	exit(1);
-	}
+if(hysteresis < 0 || hysteresis > 100){
+	printf("Hysteresis value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
+	exit(1);
+}
 
-	fclose(config_file);
+fclose(config_file);
 }
 
 
@@ -324,9 +324,9 @@ long get_time(){
 	long time = 0;
 	struct timespec ts;
 
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    time += (ts.tv_sec*1000000000);
-    time += ts.tv_nsec;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	time += (ts.tv_sec*1000000000);
+	time += ts.tv_nsec;
 
 	return time;
 }
@@ -348,34 +348,34 @@ void init_model_matrices(){
 	throughput_real = (double**) malloc(sizeof(double*) * (max_pstate+1)); 
 
 	for (i = 0; i <= max_pstate; i++){
-   		power_model[i] = (double *) malloc(sizeof(double) * (total_threads));
-   		throughput_model[i] = (double *) malloc(sizeof(double) * (total_threads));
+		power_model[i] = (double *) malloc(sizeof(double) * (total_threads));
+		throughput_model[i] = (double *) malloc(sizeof(double) * (total_threads));
 
-   		power_validation[i] = (double *) malloc(sizeof(double) * (total_threads));
-   		throughput_validation[i] = (double *) malloc(sizeof(double) * (total_threads));
+		power_validation[i] = (double *) malloc(sizeof(double) * (total_threads));
+		throughput_validation[i] = (double *) malloc(sizeof(double) * (total_threads));
 
-   		power_real[i] = (double *) malloc(sizeof(double) * (total_threads));
-   		throughput_real[i] = (double *) malloc(sizeof(double) * (total_threads));
-   	}
+		power_real[i] = (double *) malloc(sizeof(double) * (total_threads));
+		throughput_real[i] = (double *) malloc(sizeof(double) * (total_threads));
+	}
 
    	// Init first row with all zeros 
-   	for(i = 0; i <= max_pstate; i++){
-   		power_model[i][0] = 0;
-   		throughput_model[i][0] = 0;
+	for(i = 0; i <= max_pstate; i++){
+		power_model[i][0] = 0;
+		throughput_model[i][0] = 0;
 
-   		power_validation[i][0] = 0;
-   		throughput_validation[i][0] = 0;
+		power_validation[i][0] = 0;
+		throughput_validation[i][0] = 0;
 
-   		power_real[i][0] = 0;
-   		throughput_real[i][0] = 0;
-   	}
+		power_real[i][0] = 0;
+		throughput_real[i][0] = 0;
+	}
 }
 
 // Initialization of global variables 
 void init_global_variables(){
 
 	#ifdef DEBUG_HEURISTICS
-		printf("Initializing global variables\n");
+	printf("Initializing global variables\n");
 	#endif
 
 	round_completed=0;
@@ -408,13 +408,13 @@ void init_global_variables(){
 	low_pstate = -1;
 
 	net_time_sum = 0;
-    net_energy_sum = 0;
-    net_commits_sum = 0;
+	net_energy_sum = 0;
+	net_commits_sum = 0;
 	net_aborts_sum = 0;
 
 	net_time_slot_start= 0;
 	net_energy_slot_start= 0;
-    net_time_accumulator= 0;
+	net_time_accumulator= 0;
 	net_error_accumulator= 0; 
 	net_discard_barrier= 0;
 
@@ -428,8 +428,8 @@ void init_global_variables(){
 
 	validation_pstate = max_pstate-1;
 	#ifdef DEBUG_HEURISTICS
-		printf("Global variables initialized\n");
-fflush(stdout);
+	printf("Global variables initialized\n");
+	fflush(stdout);
 	#endif
 }
 
@@ -466,7 +466,7 @@ void set_boost(int value){
 void powercap_init(int threads){
 	
 	#ifdef DEBUG_HEURISTICS	
-		printf("CREATE called\n");
+	printf("CREATE called\n");
 	#endif
 
 	load_config_file();
@@ -476,21 +476,21 @@ void powercap_init(int threads){
 	init_global_variables();	
 
   	// Necessary for the static execution in order to avoid running for the first step with a different frequency than manually set in hope_config.txt
-  	if(heuristic_mode == 8){
-  		if(static_pstate >= 0 && static_pstate <= max_pstate)
-  			set_pstate(static_pstate);
-  		else 
-  			printf("The parameter manual_pstate is set outside of the valid range for this CPU. Setting the CPU to the slowest frequency/voltage\n");
-  	}else if(heuristic_mode == 12 || heuristic_mode == 13 || heuristic_mode == 15){
-  		set_pstate(max_pstate);
-  		starting_threads = 1;
-  	}
+	if(heuristic_mode == 8){
+		if(static_pstate >= 0 && static_pstate <= max_pstate)
+			set_pstate(static_pstate);
+		else 
+			printf("The parameter manual_pstate is set outside of the valid range for this CPU. Setting the CPU to the slowest frequency/voltage\n");
+	}else if(heuristic_mode == 12 || heuristic_mode == 13 || heuristic_mode == 15){
+		set_pstate(max_pstate);
+		starting_threads = 1;
+	}
 
 	if(heuristic_mode == 15)
 		init_model_matrices();
 
 	#ifdef DEBUG_HEURISTICS
-		printf("Heuristic mode: %d\n", heuristic_mode);
+	printf("Heuristic mode: %d\n", heuristic_mode);
 	#endif
 
 	if(starting_threads > total_threads){
@@ -519,9 +519,9 @@ void powercap_init_thread(){
 
 	// Wait for all threads to get initialized
 	while(initialized_thread_counter < nas_total_threads){}
-	
-	if(id == 0)
-		set_threads(active_threads);
+		
+		if(id == 0)
+			set_threads(active_threads);
 
 	#ifdef DEBUG_HEURISTICS
 		if(id == 0){
@@ -533,24 +533,24 @@ void powercap_init_thread(){
 
 
 	// Thread 0 sets itself as a collector and inits global variables or init global variables if lock based
-	if(id == 0){
+		if(id == 0){
 
 		// Set active_threads to starting_threads
-		set_threads(starting_threads);
-		net_time_slot_start = get_time();
+			set_threads(starting_threads);
+			net_time_slot_start = get_time();
 
-		net_energy_slot_start = get_energy();
-		stats_ptr->start_time = net_time_slot_start;
-		stats_ptr->start_energy = net_energy_slot_start;
-	}
+			net_energy_slot_start = get_energy();
+			stats_ptr->start_time = net_time_slot_start;
+			stats_ptr->start_energy = net_energy_slot_start;
+		}
 
 
-} 
+	} 
 
 
 // Function called before taking a lock
-void powercap_lock_taken(){
-	
+	void powercap_lock_taken(){
+		
 	/*
 	// At first run should initialize thread and get thread number
 	if(thread_number_init == 0){
@@ -624,10 +624,10 @@ void powercap_lock_taken(){
 		stats_ptr->start_energy = get_energy();
 		stats_ptr->start_time = get_time();
 	}*/
-}
+	}
 
 // Function called after releasing a lock
-void powercap_lock_release(){
+	void powercap_lock_release(){
 
 	/*
 	if(stats_ptr->reset_bit == 1){
@@ -636,13 +636,13 @@ void powercap_lock_release(){
 	} else{
 		stats_ptr->commits++;
 	}*/
-}
+	}
 
 // Called before a barrier, must wake-up all threads to avoid a deadlock
-void powercap_before_barrier(){
+	void powercap_before_barrier(){
 
-	if(thread_number == 0 && thread_number_init == 1) {
-		
+		if(thread_number == 0 && thread_number_init == 1) {
+			
 		/*
 		#ifdef DEBUG_HEURISTICS
 			printf("Powercap_before_barrier - active_thread %d\n", active_threads);
@@ -653,10 +653,10 @@ void powercap_before_barrier(){
 
 		// Dont consider next slot for power_limit error measurements
 		//net_discard_barrier = 1;
+		}
 	}
-}
 
-void powercap_after_barrier(){
+	void powercap_after_barrier(){
 
 	/*#ifdef DEBUG_HEURISTICS
 		printf("Powercap_after_barrier - active_thread %d\n", active_threads);
@@ -671,11 +671,11 @@ void powercap_after_barrier(){
 	}
 	*/
 
-}
+	}
 
-void powercap_before_cond_wait(){
+	void powercap_before_cond_wait(){
 
-	if(thread_number == 0 && thread_number_init == 1) {
+		if(thread_number == 0 && thread_number_init == 1) {
 			
 		// Next decision phase should be dropped
 		//barrier_detected = 1;
@@ -683,27 +683,27 @@ void powercap_before_cond_wait(){
 
 		// Dont consider next slot for power_limit error measurements
 		//net_discard_barrier = 1;
-	}
+		}
 
 	/*
 	#ifdef DEBUG_HEURISTICS
 		printf("powercap_before_cond_wait() called\n");
 	#endif
 	*/
-}
+	}
 
-void powercap_after_cond_wait(){
-	
+	void powercap_after_cond_wait(){
+		
 	/*#ifdef DEBUG_HEURISTICS
 		printf("powercap_after_cond_wait() called\n");
 	#endif*/
-}
+	}
 
-void powercap_commit_work(){
+	void powercap_commit_work(){
 
-	stats_ptr->commits++;
+		stats_ptr->commits++;
 
-	if(stats_ptr->commits >= stats_ptr->total_commits){
+		if(stats_ptr->commits >= stats_ptr->total_commits){
 
 		//Aggregate data and set reset_bits to 1 for all threads
 		double throughput, power;	// Expressed as critical sections per second and Watts respectively
@@ -738,7 +738,7 @@ void powercap_commit_work(){
 			}else{
 				net_discard_barrier = 0;
 			}
-						
+			
 			//Reset start counters
 			net_time_slot_start = end_time_slot;
 			net_energy_slot_start = end_energy_slot;
@@ -772,9 +772,11 @@ void powercap_commit_work(){
 
 void powercap_print_stats(){
 
-extern char *__progname;
+#ifdef PRINT_STATS
 
-char fileName[32];
+	extern char *__progname;
+
+	char fileName[32];
 
 	if (heuristic_mode==8)
 		sprintf(fileName, "%s-%i-%i.txt", __progname, current_pstate, active_threads);
@@ -784,20 +786,21 @@ char fileName[32];
 	printf ("\nWrinting stats to file: %s\n", fileName);
 	fflush(stdout);
 	
-	int fd = fopen(fileName, "a");
+	FILE* fd = fopen(fileName, "a");
 	if(fd==NULL) {
 		printf("\nError opening output file. Exiting...\n");
-    		exit(1);
-  	}
+		exit(1);
+	}
 
 
-	#ifdef PRINT_STATS
-	  	double time_in_seconds = ( (double) net_time_sum) / 1000000000;
-	  	double net_throughput =  ( (double) net_commits_sum) / time_in_seconds;
-	  	double net_avg_power = ( (double) net_energy_sum) / (( (double) net_time_sum) / 1000);
 
-	  	fprintf(fd,"Net_runtime: %lf\tNet_throughput: %lf\tNet_power: %lf\tNet_commits: %ld\tNet_error: %lf\n",time_in_seconds, net_throughput, net_avg_power, net_commits_sum, net_error_accumulator);
+	double time_in_seconds = ( (double) net_time_sum) / 1000000000;
+	double net_throughput =  ( (double) net_commits_sum) / time_in_seconds;
+	double net_avg_power = ( (double) net_energy_sum) / (( (double) net_time_sum) / 1000);
 
-  	#endif
+	fprintf(fd,"Net_runtime: %lf\tNet_throughput: %lf\tNet_power: %lf\tNet_commits: %ld\tNet_error: %lf\n",time_in_seconds, net_throughput, net_avg_power, net_commits_sum, net_error_accumulator);
+
+
 	fclose(fd);
-  }
+ #endif
+}
