@@ -66,6 +66,7 @@ void stop_searching(){
 		set_threads(best_threads);
     }
 
+    //Set High and Low for fluctuations when running the model
     if(heuristic_mode == 15 && detection_mode == 2){
 
     	high_threads = best_threads;
@@ -75,9 +76,17 @@ void stop_searching(){
     		high_pstate = best_pstate - 1;
     	else high_pstate = best_pstate;
 
+    	// Must set dummy value because high was not explored
+    	high_throughput = best_throughput+best_throughput*0.1;
+    	high_power = best_power+best_power*0.1;
+
     	if(best_pstate < max_pstate)
     		low_pstate = best_pstate+1;
     	else low_pstate = best_pstate;
+    	
+    	// Must set dummy value because high was not explored
+    	low_throughput = best_throughput+best_throughput*0.1;
+    	low_power = best_power+best_power*0.1;
     }
 
 	#ifdef DEBUG_HEURISTICS
