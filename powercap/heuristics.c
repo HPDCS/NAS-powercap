@@ -1005,7 +1005,7 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "\n");
 					fclose(model_validation_file);
 
-					sprintf(output_filename, "%s-model_percent_mre.txt", __progname);
+					sprintf(output_filename, "%s-throughput_percent_mre.txt", __progname);
 
 					FILE* model_percent_mre = fopen(output_filename,"w+");
 						fprintf(model_percent_mre, "%lf\n", throughput_abs_re_sum/(double) total_confgurations_for_thr_mre*(double)100);
