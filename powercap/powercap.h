@@ -29,7 +29,7 @@ volatile int thread_counter;	// Global variable used for assigning an increasing
 volatile int initialized_thread_counter;	// Global variable used for syncronizing threads during initialization
 volatile int running_token;		// Token used to manage sleep after barrier. Necessary to manage situations where signals arrive before thread is actually back to pausing
 volatile int cond_waiters;		// Used to manage phread conditional wait. It's incremented and decremented atomically
-int first_commit;			// Used to filter out the first commit
+int current_ramp_up_commits;	// Used to filter out the initial commits
 
 // powercap_config.txt variables
 int starting_threads;			// Number of threads running at the start of the exploration
@@ -47,6 +47,7 @@ int core_packing;			// 0-> threads scheduling, 1 -> core packing
 double extra_range_percentage;	// Defines the range in percentage over power_limit which is considered valid for the HIGH and LOW configurations. Used by dynamic_heuristic1. Defined in hope_config.txt
 int window_size; 				// Defines the lenght of the window, defined in steps, that should achieve a power consumption within power_limit. Used by dynamic_heuristic1. Defined in hope_config.txt 
 double hysteresis;				// Defines the amount in percentage of hysteresis that should be applied when deciding the next step in a window based on the current value of window_power. Used by dynamic_heuristic1. Defined in hope_config.txt
+int ramp_up_commits;			// Input parameter to set the number of ramp up commits
 
 // Variable specific to NET_STATS
 long net_time_sum;
@@ -139,10 +140,6 @@ void powercap_lock_taken(void);
 void powercap_lock_release(void);
 void powercap_init(int);
 void powercap_init_thread(void);
-void powercap_before_barrier(void);
-void powercap_after_barrier(void);
-void powercap_before_cond_wait(void);
-void powercap_after_cond_wait(void);
 void powercap_print_stats(void);
 void powercap_commit_work(void);
 

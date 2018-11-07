@@ -264,24 +264,28 @@ void load_config_file(){
 		printf("Error opening powercap_config configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d CORE_PACKING=%d EXTRA_RANGE_PERCENTAGE=%lf WINDOW_SIZE=%d HYSTERESIS=%lf ", 
-		&starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing, &extra_range_percentage, &window_size, &hysteresis)!=15) {
+	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d CORE_PACKING=%d EXTRA_RANGE_PERCENTAGE=%lf WINDOW_SIZE=%d HYSTERESIS=%lf RAMP_UP_COMMITS=%d", 
+		&starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing, &extra_range_percentage, &window_size, &hysteresis, &ramp_up_commits)!=16) {
 		printf("The number of input parameters of the configuration file does not match the number of required parameters.\n");
-	exit(1);
-}
+		exit(1);
+	}
 
-if(extra_range_percentage < 0 || extra_range_percentage > 100){
-	printf("Extra_range_percentage value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
-	exit(1);
-}
+	if(extra_range_percentage < 0 || extra_range_percentage > 100){
+		printf("Extra_range_percentage value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
+		exit(1);
+	}
 
+	if(hysteresis < 0 || hysteresis > 100){
+		printf("Hysteresis value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
+		exit(1);
+	}
 
-if(hysteresis < 0 || hysteresis > 100){
-	printf("Hysteresis value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
-	exit(1);
-}
+	if(ramp_up_commits < 1){
+		printf("Ramp_up_commits input parameter must be higher than 0\n");
+		exit(1);
+	}
 
-fclose(config_file);
+	fclose(config_file);
 }
 
 
@@ -425,6 +429,7 @@ void init_global_variables(){
 	max_thread_search = total_threads;
 	min_thread_search_throughput = -1;
 	max_thread_search_throughput = -1;
+	current_ramp_up_commits = 0;
 
 	validation_pstate = max_pstate-1;
 	#ifdef DEBUG_HEURISTICS
@@ -519,9 +524,6 @@ void powercap_init_thread(){
 
 	// Wait for all threads to get initialized
 	while(initialized_thread_counter < nas_total_threads){}
-		
-		if(id == 0)
-			set_threads(active_threads);
 
 	#ifdef DEBUG_HEURISTICS
 		if(id == 0){
@@ -529,181 +531,29 @@ void powercap_init_thread(){
 			fflush(stdout);
 		}
 	#endif
+} 
 
 
+void powercap_commit_work(){
 
-	// Thread 0 sets itself as a collector and inits global variables or init global variables if lock based
-		if(id == 0){
-
-		// Set active_threads to starting_threads
+	// We discard first commits to allow application ramp up before measuring
+	if (current_ramp_up_commits < ramp_up_commits) {
+		current_ramp_up_commits++;
+		if(current_ramp_up_commits == ramp_up_commits){
 			set_threads(starting_threads);
-			net_time_slot_start = get_time();
 
+			// Init application wide counters
+			net_time_slot_start = get_time();
 			net_energy_slot_start = get_energy();
 			stats_ptr->start_time = net_time_slot_start;
 			stats_ptr->start_energy = net_energy_slot_start;
 		}
-
-
-	} 
-
-
-// Function called before taking a lock
-	void powercap_lock_taken(){
-		
-	/*
-	// At first run should initialize thread and get thread number
-	if(thread_number_init == 0){
-		powercap_init_thread();
+		return;
 	}
 
-	if(thread_number == 0 && stats_ptr->commits >= stats_ptr->total_commits){
+	stats_ptr->commits++;
 
-		//Aggregate data and set reset_bits to 1 for all threads
-		double throughput, power;	// Expressed as critical sections per second and Watts respectively
-		long end_time_slot, end_energy_slot, time_interval, energy_interval;
-
-		double commits_sum = 0;
-		end_time_slot = get_time();
-		end_energy_slot = get_energy();
-
-
-		for(int i=0; i<total_threads; i++){
-				if(stats_array[i]->reset_bit == 0){
-					commits_sum += stats_array[i]->commits;
-					stats_array[i]->reset_bit = 1;		
-				}
-		}
-
-		time_interval = end_time_slot - stats_ptr->start_time; //Expressed in nano seconds 
-		energy_interval = end_energy_slot - stats_ptr->start_energy; // Expressed in micro Joule
-		throughput = ((double) commits_sum) / (((double) time_interval)/ 1000000000);
-		power = ((double) energy_interval) / (((double) time_interval)/ 1000);
-
-		//Update counters for computing the powercap error with 1 second granularity
-		long slot_time_passed = end_time_slot - net_time_slot_start;
-
-		if(slot_time_passed > 1000000000){ //If higher than 1 second update the accumulator with the value of error compared to power_limit
-			if(net_discard_barrier == 0){
-				long slot_energy_consumed = end_energy_slot - net_energy_slot_start;
-				double slot_power = (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
-
-				double error_signed = slot_power - power_limit;
-				double error = 0;
-				if(error_signed > 0)
-					error = error_signed/power_limit*100;
-
-				// Add the error to the accumulator
-				net_error_accumulator = (net_error_accumulator*((double)net_time_accumulator)+error*((double)slot_time_passed))/( ((double)net_time_accumulator)+( (double) slot_time_passed));
-				net_time_accumulator+=slot_time_passed;
-			}else{
-				net_discard_barrier = 0;
-			}
-						
-			//Reset start counters
-			net_time_slot_start = end_time_slot;
-			net_energy_slot_start = end_energy_slot;
-		}
-
-		// Call heuristics if should not discard sampling
-		if(barrier_detected == 1){
-			barrier_detected = 0;
-		}
-		else{
-			// We don't call the heuristic if the energy results are out or range due to an overflow 
-			if(power > 0){
-				net_time_sum += time_interval;
-				net_energy_sum += energy_interval;
-				net_commits_sum += commits_sum;
-
-				heuristic(throughput, power, time_interval);
-			}
-		}
-
-		//Setup next round
-		stats_ptr->start_energy = get_energy();
-		stats_ptr->start_time = get_time();
-	}*/
-	}
-
-// Function called after releasing a lock
-	void powercap_lock_release(){
-
-	/*
-	if(stats_ptr->reset_bit == 1){
-		stats_ptr->commits = 1;
-		stats_ptr-> reset_bit = 0;
-	} else{
-		stats_ptr->commits++;
-	}*/
-	}
-
-// Called before a barrier, must wake-up all threads to avoid a deadlock
-	void powercap_before_barrier(){
-
-		if(thread_number == 0 && thread_number_init == 1) {
-			
-		/*
-		#ifdef DEBUG_HEURISTICS
-			printf("Powercap_before_barrier - active_thread %d\n", active_threads);
-		#endif*/
-			
-		// Next decision phase should be dropped
-		//barrier_detected = 1;
-
-		// Dont consider next slot for power_limit error measurements
-		//net_discard_barrier = 1;
-		}
-	}
-
-	void powercap_after_barrier(){
-
-	/*#ifdef DEBUG_HEURISTICS
-		printf("Powercap_after_barrier - active_thread %d\n", active_threads);
-	#endif
-	if(thread_number == 0){
-		if(stats_ptr->reset_bit == 1){
-                	stats_ptr->commits = 1;
-                	stats_ptr-> reset_bit = 0;
-       		} else{
-                	stats_ptr->commits++;
-		}
-	}
-	*/
-
-	}
-
-	void powercap_before_cond_wait(){
-
-		if(thread_number == 0 && thread_number_init == 1) {
-			
-		// Next decision phase should be dropped
-		//barrier_detected = 1;
-
-
-		// Dont consider next slot for power_limit error measurements
-		//net_discard_barrier = 1;
-		}
-
-	/*
-	#ifdef DEBUG_HEURISTICS
-		printf("powercap_before_cond_wait() called\n");
-	#endif
-	*/
-	}
-
-	void powercap_after_cond_wait(){
-		
-	/*#ifdef DEBUG_HEURISTICS
-		printf("powercap_after_cond_wait() called\n");
-	#endif*/
-	}
-
-	void powercap_commit_work(){
-
-		stats_ptr->commits++;
-
-		if(stats_ptr->commits >= stats_ptr->total_commits){
+	if(stats_ptr->commits >= stats_ptr->total_commits){
 
 		//Aggregate data and set reset_bits to 1 for all threads
 		double throughput, power;	// Expressed as critical sections per second and Watts respectively
@@ -745,9 +595,8 @@ void powercap_init_thread(){
 		}
 
 		// Call heuristics if should not discard sampling
-		if(barrier_detected == 1 || first_commit == 0){
+		if(barrier_detected == 1){
 			barrier_detected = 0;
-			first_commit = 1;
 		}
 		else{
 			// We don't call the heuristic if the energy results are out or range due to an overflow 
@@ -782,10 +631,10 @@ void powercap_print_stats(){
 		sprintf(fileName, "%s-%i-%i.txt", __progname, current_pstate, active_threads);
 	else 
 		sprintf(fileName, "%s-%i-%i.txt", __progname, heuristic_mode, (int)power_limit);
-	
+
 	printf ("\nWrinting stats to file: %s\n", fileName);
 	fflush(stdout);
-	
+
 	FILE* fd = fopen(fileName, "a");
 	if(fd==NULL) {
 		printf("\nError opening output file. Exiting...\n");
@@ -802,5 +651,5 @@ void powercap_print_stats(){
 
 
 	fclose(fd);
- #endif
+#endif
 }
