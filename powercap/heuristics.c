@@ -940,11 +940,11 @@ void heuristic(double throughput, double power, long time){
 					// Print validation results to file
 
 					extern char *__progname;
-					char output_filename[32];
+					char output_filename[64];
 
 					sprintf(output_filename, "%s-model_validation.txt", __progname);
 	
-					printf ("\nWrinting model_validation data to file: %s\n", output_filename);
+					printf ("\nWrinting model validation data to file: %s", output_filename);
 					fflush(stdout);
 
 					FILE* model_validation_file = fopen(output_filename,"w+");
@@ -1015,14 +1015,16 @@ void heuristic(double throughput, double power, long time){
 					fclose(model_validation_file);
 
 					sprintf(output_filename, "%s-throughput_percent_mre.txt", __progname);
-
-					FILE* model_percent_mre = fopen(output_filename,"w+");
+					printf ("\nWrinting model validation data to file: %s", output_filename);
+					fflush(stdout);
+					FILE* model_percent_mre = fopen(output_filename,"a");
 						fprintf(model_percent_mre, "%lf\n", throughput_abs_re_sum/(double) total_confgurations_for_thr_mre*(double)100);
 					fclose(model_percent_mre);
 
 					sprintf(output_filename, "%s-power_percent_mre.txt", __progname);
-
-					FILE* power_percent_mre = fopen(output_filename,"w+");
+					printf ("\nWrinting model validation data to file: %s", output_filename);
+					fflush(stdout);
+					FILE* power_percent_mre = fopen(output_filename,"a");
 						fprintf(power_percent_mre, "%lf\n", power_abs_re_sum/(double) total_confgurations_for_pow_mre*(double)100);
 					fclose(model_percent_mre);
 
