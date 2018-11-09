@@ -1031,7 +1031,7 @@ void heuristic(double throughput, double power, long time){
 
 
 					#ifdef DEBUG_HEURISTICS
-						printf("Model validation completed\n");
+						printf("\nModel validation completed\n");
 						exit(0);
 					#endif
 				}
