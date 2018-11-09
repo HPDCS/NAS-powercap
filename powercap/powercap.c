@@ -124,7 +124,7 @@ int init_DVFS_management_intel_pstate_passive_mode(){
 	printf("\nCreating Cpu frequency list with %i p-states\n",i);
 	max_pstate = --i;
 	frequency=min_cpu_freq;
-	while(frequency<max_cpu_freq) {
+	while(frequency<=max_cpu_freq) {
 		pstate[i]=frequency;
 		printf(" %i",pstate[i]);
 		freq_available = end;
