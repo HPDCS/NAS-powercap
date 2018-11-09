@@ -1028,12 +1028,8 @@ void heuristic(double throughput, double power, long time){
 						fprintf(power_percent_mre, "%lf\n", power_abs_re_sum/(double) total_confgurations_for_pow_mre*(double)100);
 					fclose(model_percent_mre);
 
-
-
-					#ifdef DEBUG_HEURISTICS
-						printf("\nModel validation completed\n");
-						exit(0);
-					#endif
+					printf("\nModel validation completed\n");
+					exit(0);
 				}
 				else if(active_threads == total_threads){ // Should restart the model 
 					validation_pstate--;
