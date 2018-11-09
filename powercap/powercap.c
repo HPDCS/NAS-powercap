@@ -125,14 +125,14 @@ int init_DVFS_management_intel_pstate_passive_mode(){
 	frequency=min_cpu_freq;
 	while(frequency<=max_cpu_freq) {
 		pstate[i]=frequency;
-		printf(" pstate[%i]:%i",pstate[i]);
+		printf(" pstate[%i]:%i",%i,pstate[i]);
 		frequency+=100000;
-		i--;
+		i--;i
 	}
 	//set pstate 0
 	if (boost_disabled) frequency-=100000;
 	pstate[i]=frequency;
-	printf(" pstate[%i]:%i",pstate[i]);
+	printf(" pstate[%i]:%i",%i,pstate[i]);
 	if (boost_disabled) printf("(disabled)");
 
 	printf("\nCpu frequency list completed\n");
