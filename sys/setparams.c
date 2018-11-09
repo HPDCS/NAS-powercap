@@ -398,7 +398,7 @@ void write_bt_info(FILE *fp, char class)
 {
   int problem_size, niter;
   char *dt;
-  if      (class == 'S') { problem_size = 12;  dt = "0.010";   niter = 600; }
+  if      (class == 'S') { problem_size = 12;  dt = "0.010";   niter = 2000; }
   else if (class == 'W') { problem_size = 24;  dt = "0.0008";  niter = 2000; }
   else if (class == 'A') { problem_size = 64;  dt = "0.0008";  niter = 2000; }
   else if (class == 'B') { problem_size = 102; dt = "0.0003";  niter = 2000; }

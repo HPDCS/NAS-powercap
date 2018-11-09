@@ -944,7 +944,7 @@ void heuristic(double throughput, double power, long time){
 
 					sprintf(output_filename, "%s-model_validation.txt", __progname);
 	
-					printf ("\nWrinting model validation data to file: %s", output_filename);
+					printf ("\nWriting model validation data to file: %s", output_filename);
 					fflush(stdout);
 
 					FILE* model_validation_file = fopen(output_filename,"w+");

@@ -1,11 +1,18 @@
+#!/bin/bash
 ITERATIONS=2
+OMP_THREADS=21
 
-export OMP_NUM_THREADS=21
-for b in $(seq 1 $ITERATIONS)	
+APPS="bt.W.x cg.B.x ft.A.x lu.B.x sp.B.x mg.C.x is.C.x ua.B.x"
+
+
+
+export OMP_NUM_THREADS=$OMP_THREADS
+for app in $APPS
 do	
-	echo "Running ..."
-	 ./bt.S.x
-	
+	for b in $(seq 1 $ITERATIONS)	
+	do	
+		echo "Running $app iteration $b..."
+		./$app
+	done
+	echo "All $app runs completed."
 done
-
-echo "Completed."
