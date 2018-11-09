@@ -2,7 +2,7 @@
 ITERATIONS=2
 OMP_THREADS=21
 
-APPS="bt.W.x cg.B.x ft.A.x lu.B.x sp.B.x mg.C.x is.C.x ua.B.x"
+APPS="bt.B.x cg.B.x ft.A.x lu.B.x sp.B.x mg.C.x is.C.x ua.B.x"
 
 
 
