@@ -97,7 +97,6 @@ int init_DVFS_management(){
 int init_DVFS_management_intel_pstate_passive_mode(){
 	
 	char fname[64];
-	char* freq_available;
 	int frequency, i;
 	FILE* governor_file;
 
@@ -127,7 +126,6 @@ int init_DVFS_management_intel_pstate_passive_mode(){
 	while(frequency<=max_cpu_freq) {
 		pstate[i]=frequency;
 		printf(" %i",pstate[i]);
-		freq_available = end;
 		frequency+=100000;
 		i--;
 	}
@@ -135,7 +133,7 @@ int init_DVFS_management_intel_pstate_passive_mode(){
 	if (boost_disabled) frequency-=100000;
 	pstate[i]=frequency;
 	printf(" %i",pstate[i]);
-	freq_available = end;
+	if (boost_disabled) printf("(disabled)");
 
 	printf("\nCpu frequency list completed\n");
 
@@ -475,7 +473,7 @@ void powercap_init(int threads){
 	#endif
 
 	load_config_file();
-	init_DVFS_management();
+	init_DVFS_management_intel_pstate_passive_mode();
 	init_thread_management(threads);
 	init_stats_array_pointer(threads);
 	init_global_variables();	
