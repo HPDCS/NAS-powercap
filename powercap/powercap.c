@@ -118,7 +118,7 @@ int init_DVFS_management_intel_pstate_passive_mode(){
 	// Init array of available frequencies
 
 	pstate = malloc(sizeof(int)*32);
-	i = (max_cpu_freq-min_cpu_freq)/100000+1; 
+	i = (max_cpu_freq-min_cpu_freq)/100000i+1; 
 	char * end;
 	printf("\nCreating Cpu frequency list with %i p-states\n",i);
 	max_pstate = --i;
@@ -473,7 +473,7 @@ void powercap_init(int threads){
 	#endif
 
 	load_config_file();
-	init_DVFS_management_intel_pstate_passive_mode();
+	init_DVFS_management();
 	init_thread_management(threads);
 	init_stats_array_pointer(threads);
 	init_global_variables();	
