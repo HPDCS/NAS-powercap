@@ -262,8 +262,8 @@ void load_config_file(){
 		printf("Error opening powercap_config configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d CORE_PACKING=%d EXTRA_RANGE_PERCENTAGE=%lf WINDOW_SIZE=%d HYSTERESIS=%lf RAMP_UP_COMMITS=%d", 
-		&starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing, &extra_range_percentage, &window_size, &hysteresis, &ramp_up_commits)!=16) {
+	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d HEURISTIC_MODE=%d DETECTION_MODE=%d EXPLOIT_STEPS=%d POWER_UNCORE=%lf MIN_CPU_FREQ=%d MAX_CPU_FREQ=%d BOOST_DISABLED=%d CORE_PACKING=%d EXTRA_RANGE_PERCENTAGE=%lf WINDOW_SIZE=%d HYSTERESIS=%lf RAMP_UP_COMMITS=%d LOWER_SAMPLED_MODEL_PSTATE=%d", 
+		&starting_threads, &static_pstate, &power_limit, &total_commits_round, &heuristic_mode, &detection_mode, &exploit_steps, &power_uncore, &min_cpu_freq, &max_cpu_freq, &boost_disabled, &core_packing, &extra_range_percentage, &window_size, &hysteresis, &ramp_up_commits, &lower_sampled_model_pstate)!=17) {
 		printf("The number of input parameters of the configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}

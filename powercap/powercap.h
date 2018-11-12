@@ -48,6 +48,7 @@ double extra_range_percentage;	// Defines the range in percentage over power_lim
 int window_size; 				// Defines the lenght of the window, defined in steps, that should achieve a power consumption within power_limit. Used by dynamic_heuristic1. Defined in hope_config.txt 
 double hysteresis;				// Defines the amount in percentage of hysteresis that should be applied when deciding the next step in a window based on the current value of window_power. Used by dynamic_heuristic1. Defined in hope_config.txt
 int ramp_up_commits;			// Input parameter to set the number of ramp up commits
+int lower_sampled_model_pstate;		// Define the lower sampled pstate to compute the model
 
 // Variable specific to NET_STATS
 long net_time_sum;
