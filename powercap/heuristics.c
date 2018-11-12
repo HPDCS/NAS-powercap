@@ -935,7 +935,7 @@ void heuristic(double throughput, double power, long time){
 				power_validation[current_pstate][active_threads] = power_model[current_pstate][active_threads];
 				throughput_validation[current_pstate][active_threads] = throughput_model[current_pstate][active_threads];
 				
-				if(current_pstate == 2 && active_threads == total_threads){
+				if(current_pstate == 1 && active_threads == total_threads){
 					
 					// Do not restart the exploration/model setup
 					detection_mode = 0;
@@ -956,7 +956,7 @@ void heuristic(double throughput, double power, long time){
 					double power_re, power_abs_re_sum=0;
 					// Write real, predicted and error for throughput to file
 					fprintf(model_validation_file, "Real throughput\n");
-					for(i = 2; i < max_pstate; i++){
+					for(i = 1; i <= max_pstate; i++){
 						for (j = 1; j <= total_threads; j++){
 							fprintf(model_validation_file, "%lf\t", throughput_real[i][j]);
 						}
@@ -965,7 +965,7 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "\n");
 
 					fprintf(model_validation_file, "Predicted throughput\n");
-					for(i = 2; i < max_pstate; i++){
+					for(i = 1; i <= max_pstate; i++){
 						for (j = 1; j <= total_threads; j++){
 							fprintf(model_validation_file, "%lf\t", throughput_validation[i][j]);
 						}
@@ -974,12 +974,14 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "\n");
 
 					fprintf(model_validation_file, "Throughput error percentage\n");
-					for(i = 2; i < max_pstate; i++){
+					for(i = 1; i <= max_pstate; i++){
 						for (j = 1; j <= total_threads; j++){
 							throughput_re=(throughput_validation[i][j]-throughput_real[i][j])/throughput_real[i][j];
 							fprintf(model_validation_file, "%lf\t", 100*throughput_re);
-							throughput_abs_re_sum+=fabs(throughput_re);
-							total_confgurations_for_thr_mre++;							
+							if (i!=lower_sampled_model_pstate && i!=max_pstate) {
+								throughput_abs_re_sum+=fabs(throughput_re);
+								total_confgurations_for_thr_mre++;							
+							}
 						}
 						fprintf(model_validation_file, "\n");
 					}
@@ -987,7 +989,7 @@ void heuristic(double throughput, double power, long time){
 
 					// Write real, predicted and error for power to file
 					fprintf(model_validation_file, "Real power\n");
-					for(i = 2; i < max_pstate; i++){
+					for(i = 1; i <= max_pstate; i++){
 						for (j = 1; j <= total_threads; j++){
 							fprintf(model_validation_file, "%lf\t", power_real[i][j]);
 						}
@@ -996,7 +998,7 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "\n");
 
 					fprintf(model_validation_file, "Predicted power\n");
-					for(i = 2; i < max_pstate; i++){
+					for(i = 1; i <= max_pstate; i++){
 						for (j = 1; j <= total_threads; j++){
 							fprintf(model_validation_file, "%lf\t", power_validation[i][j]);
 						}
@@ -1005,12 +1007,14 @@ void heuristic(double throughput, double power, long time){
 					fprintf(model_validation_file, "\n");
 
 					fprintf(model_validation_file, "power error percentage\n");
-					for(i = 2; i < max_pstate; i++){						
+					for(i = 1; i <= max_pstate; i++){						
 						for (j = 1; j <= total_threads; j++){
 							power_re=(power_validation[i][j]-power_real[i][j])/power_real[i][j];
 							fprintf(model_validation_file, "%lf\t", 100*power_re);
-							power_abs_re_sum+=fabs(power_re);
-							total_confgurations_for_pow_mre++;
+							if (i!=lower_sampled_model_pstate && i!=max_pstate) {
+								power_abs_re_sum+=fabs(power_re);
+								total_confgurations_for_pow_mre++;
+							}
 						}
 						fprintf(model_validation_file, "\n");
 					}
