@@ -827,6 +827,13 @@ void model_power_throughput(double throughput, double power){
 	power_model[current_pstate][active_threads] = power;
 	throughput_model[current_pstate][active_threads] = throughput;
 
+	if(current_pstate == max_pstate){
+		power_real[current_pstate][active_threads] = power;
+		throughput_real[current_pstate][active_threads] = throughput;
+		power_validation[current_pstate][active_threads] = power_model[current_pstate][active_threads];
+		throughput_validation[current_pstate][active_threads] = throughput_model[current_pstate][active_threads];
+	}
+
 	if(active_threads == total_threads && current_pstate == lower_sampled_model_pstate){
 		
 		compute_power_model();
@@ -930,13 +937,26 @@ void heuristic(double throughput, double power, long time){
 				power_real[current_pstate][active_threads] = power;
 				throughput_real[current_pstate][active_threads] = throughput;
 
+				// DEBUG
+				printf("Setting power and throughput validation for P-state %d and threads %d\n", current_pstate, active_threads);
+				// TO BE REMOVED
+
 				// Copy to the validation array predictions from the model. Necessary as we perform multiple runs of the model
 				// to account for workload variability
 				power_validation[current_pstate][active_threads] = power_model[current_pstate][active_threads];
 				throughput_validation[current_pstate][active_threads] = throughput_model[current_pstate][active_threads];
 				
 				if(current_pstate == 1 && active_threads == total_threads){
-					
+
+					// Set validation for p-state equal to lower_sampled_model_pstate
+					for(int l = 1; l<total_threads; l++){
+						power_real[lower_sampled_model_pstate][l] = power_model[lower_sampled_model_pstate][l];
+						throughput_real[lower_sampled_model_pstate][l] = throughput_model[lower_sampled_model_pstate][l];
+						power_validation[lower_sampled_model_pstate][l] = power_model[lower_sampled_model_pstate][l];
+						throughput_validation[lower_sampled_model_pstate][l] = throughput_model[lower_sampled_model_pstate][l];
+					}
+				
+						
 					// Do not restart the exploration/model setup
 					detection_mode = 0;
 					double t;
@@ -1040,6 +1060,8 @@ void heuristic(double throughput, double power, long time){
 				}
 				else if(active_threads == total_threads){ // Should restart the model 
 					validation_pstate--;
+					if(validation_pstate == lower_sampled_model_pstate)
+						validation_pstate--;
 					stopped_searching = 0;
 					set_pstate(max_pstate);
   					set_threads(1);
