@@ -981,7 +981,7 @@ void heuristic(double throughput, double power, long time){
 							if (i!=lower_sampled_model_pstate && i!=max_pstate) {
 								throughput_abs_re_sum+=fabs(throughput_re);
 								total_confgurations_for_thr_mre++;							
-							}
+							} 
 						}
 						fprintf(model_validation_file, "\n");
 					}
