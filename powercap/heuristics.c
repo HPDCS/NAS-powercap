@@ -827,7 +827,7 @@ void model_power_throughput(double throughput, double power){
 	power_model[current_pstate][active_threads] = power;
 	throughput_model[current_pstate][active_threads] = throughput;
 
-	if(active_threads == total_threads && current_pstate == 1){
+	if(active_threads == total_threads && current_pstate == lower_sampled_model_pstate){
 		
 		compute_power_model();
 		compute_throughput_model();
