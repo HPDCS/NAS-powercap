@@ -937,10 +937,6 @@ void heuristic(double throughput, double power, long time){
 				power_real[current_pstate][active_threads] = power;
 				throughput_real[current_pstate][active_threads] = throughput;
 
-				// DEBUG
-				printf("Setting power and throughput validation for P-state %d and threads %d\n", current_pstate, active_threads);
-				// TO BE REMOVED
-
 				// Copy to the validation array predictions from the model. Necessary as we perform multiple runs of the model
 				// to account for workload variability
 				power_validation[current_pstate][active_threads] = power_model[current_pstate][active_threads];
