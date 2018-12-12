@@ -375,12 +375,12 @@ void write_sp_info(FILE *fp, char class)
   int problem_size, niter;
   char *dt;
   if      (class == 'S') { problem_size = 12;  dt = "0.015";   niter = 100; }
-  else if (class == 'W') { problem_size = 36;  dt = "0.0015";  niter = 450; }
-  else if (class == 'A') { problem_size = 64;  dt = "0.0015";  niter = 450; }
-  else if (class == 'B') { problem_size = 102; dt = "0.001";   niter = 450; }
-  else if (class == 'C') { problem_size = 162; dt = "0.00067"; niter = 450; }
-  else if (class == 'D') { problem_size = 408; dt = "0.00030"; niter = 450; }
-  else if (class == 'E') { problem_size = 1020; dt = "0.0001"; niter = 450; }
+  else if (class == 'W') { problem_size = 36;  dt = "0.0015";  niter = 2000; }
+  else if (class == 'A') { problem_size = 64;  dt = "0.0015";  niter = 2000; }
+  else if (class == 'B') { problem_size = 102; dt = "0.001";   niter = 2000; }
+  else if (class == 'C') { problem_size = 162; dt = "0.00067"; niter = 2000; }
+  else if (class == 'D') { problem_size = 408; dt = "0.00030"; niter = 2000; }
+  else if (class == 'E') { problem_size = 1020; dt = "0.0001"; niter = 2000; }
   else {
     printf("setparams: Internal error: invalid class %c\n", class);
     exit(1);
@@ -398,13 +398,13 @@ void write_bt_info(FILE *fp, char class)
 {
   int problem_size, niter;
   char *dt;
-  if      (class == 'S') { problem_size = 12;  dt = "0.010";   niter = 450; }
-  else if (class == 'W') { problem_size = 24;  dt = "0.0008";  niter = 450; }
-  else if (class == 'A') { problem_size = 64;  dt = "0.0008";  niter = 450; }
-  else if (class == 'B') { problem_size = 102; dt = "0.0003";  niter = 450; }
-  else if (class == 'C') { problem_size = 162; dt = "0.0001";  niter = 450; }
-  else if (class == 'D') { problem_size = 408; dt = "0.00002";  niter = 450; }
-  else if (class == 'E') { problem_size = 1020; dt = "0.4e-5";    niter = 450; }
+  if      (class == 'S') { problem_size = 12;  dt = "0.010";   niter = 2000; }
+  else if (class == 'W') { problem_size = 24;  dt = "0.0008";  niter = 2000; }
+  else if (class == 'A') { problem_size = 64;  dt = "0.0008";  niter = 2000; }
+  else if (class == 'B') { problem_size = 102; dt = "0.0003";  niter = 2000; }
+  else if (class == 'C') { problem_size = 162; dt = "0.0001";  niter = 2000; }
+  else if (class == 'D') { problem_size = 408; dt = "0.00002";  niter = 2000; }
+  else if (class == 'E') { problem_size = 1020; dt = "0.4e-5";    niter = 2000; }
   else {
     printf("setparams: Internal error: invalid class %c\n", class);
     exit(1);
@@ -444,12 +444,12 @@ void write_lu_info(FILE *fp, char class)
   char *dt_default;
 
   if      (class == 'S') { problem_size = 12;  dt_default = "0.5"; itmax = 50; }
-  else if (class == 'W') { problem_size = 33;  dt_default = "1.5e-3"; itmax = 450; }
-  else if (class == 'A') { problem_size = 64;  dt_default = "2.0"; itmax = 450; }
-  else if (class == 'B') { problem_size = 102; dt_default = "2.0"; itmax = 450; }
-  else if (class == 'C') { problem_size = 162; dt_default = "2.0"; itmax = 450; }
-  else if (class == 'D') { problem_size = 408; dt_default = "1.0"; itmax = 450; }
-  else if (class == 'E') { problem_size = 1020; dt_default = "0.5"; itmax = 450; }
+  else if (class == 'W') { problem_size = 33;  dt_default = "1.5e-3"; itmax = 2000; }
+  else if (class == 'A') { problem_size = 64;  dt_default = "2.0"; itmax = 2000; }
+  else if (class == 'B') { problem_size = 102; dt_default = "2.0"; itmax = 2000; }
+  else if (class == 'C') { problem_size = 162; dt_default = "2.0"; itmax = 2000; }
+  else if (class == 'D') { problem_size = 408; dt_default = "1.0"; itmax = 2000; }
+  else if (class == 'E') { problem_size = 1020; dt_default = "0.5"; itmax = 2000; }
   else {
     printf("setparams: Internal error: invalid class %c\n", class);
     exit(1);
@@ -481,12 +481,12 @@ void write_mg_info(FILE *fp, char class)
   int ndim1, ndim2, ndim3;
   if      (class == 'S') { problem_size = 32; nit = 4; }
 /*  else if (class == 'W') { problem_size = 64; nit = 40; }*/
-  else if (class == 'W') { problem_size = 128; nit = 450; }
-  else if (class == 'A') { problem_size = 256; nit = 450; }
-  else if (class == 'B') { problem_size = 256; nit = 450; }
-  else if (class == 'C') { problem_size = 512; nit = 450; }
-  else if (class == 'D') { problem_size = 1024; nit = 450; }
-  else if (class == 'E') { problem_size = 2048; nit = 450; }
+  else if (class == 'W') { problem_size = 128; nit = 2000; }
+  else if (class == 'A') { problem_size = 256; nit = 2000; }
+  else if (class == 'B') { problem_size = 256; nit = 2000; }
+  else if (class == 'C') { problem_size = 512; nit = 2000; }
+  else if (class == 'D') { problem_size = 1024; nit = 2000; }
+  else if (class == 'E') { problem_size = 2048; nit = 2000; }
   else {
     printf("setparams: Internal error: invalid class type %c\n", class);
     exit(1);
@@ -553,17 +553,17 @@ void write_cg_info(FILE *fp, char class)
   if( class == 'S' )
   { na=1400; nonzer=7; niter=15; shift=shiftS; }
   else if( class == 'W' )
-  { na=7000; nonzer=8; niter=450; shift=shiftW; }
+  { na=7000; nonzer=8; niter=2000; shift=shiftW; }
   else if( class == 'A' )
-  { na=14000; nonzer=11; niter=450; shift=shiftA; }
+  { na=14000; nonzer=11; niter=2000; shift=shiftA; }
   else if( class == 'B' )
-  { na=75000; nonzer=13; niter=450; shift=shiftB; }
+  { na=75000; nonzer=13; niter=2000; shift=shiftB; }
   else if( class == 'C' )
-  { na=150000; nonzer=15; niter=450; shift=shiftC; }
+  { na=150000; nonzer=15; niter=2000; shift=shiftC; }
   else if( class == 'D' )
-  { na=1500000; nonzer=21; niter=450; shift=shiftD; }
+  { na=1500000; nonzer=21; niter=2000; shift=shiftD; }
   else if( class == 'E' )
-  { na=9000000; nonzer=26; niter=450; shift=shiftE; }
+  { na=9000000; nonzer=26; niter=2000; shift=shiftE; }
   else
   {
     printf("setparams: Internal error: invalid class type %c\n", class);
@@ -589,15 +589,15 @@ void write_ua_info(FILE *fp, char class)
   if( class == 'S' )
   { lelt=250;lmor=11600;       refine_max=4;  niter=50;  nmxh=10; alpha="0.040e0"; }
   else if( class == 'W' )
-  { lelt=700;lmor=26700;       refine_max=5;  niter=450; nmxh=10; alpha="0.060e0"; }
+  { lelt=700;lmor=26700;       refine_max=5;  niter=2000; nmxh=10; alpha="0.060e0"; }
   else if( class == 'A' )
-  { lelt=2400;lmor=92700;      refine_max=6;  niter=450; nmxh=10; alpha="0.076e0"; }
+  { lelt=2400;lmor=92700;      refine_max=6;  niter=2000; nmxh=10; alpha="0.076e0"; }
   else if( class == 'B' )
-  { lelt=8800;  lmor=334600;   refine_max=7;  niter=450; nmxh=10; alpha="0.076e0"; }
+  { lelt=8800;  lmor=334600;   refine_max=7;  niter=2000; nmxh=10; alpha="0.076e0"; }
   else if( class == 'C' )
-  { lelt=33500; lmor=1262100;  refine_max=8;  niter=450; nmxh=10; alpha="0.067e0"; }
+  { lelt=33500; lmor=1262100;  refine_max=8;  niter=2000; nmxh=10; alpha="0.067e0"; }
   else if( class == 'D' )
-  { lelt=515000;lmor=19500000; refine_max=10; niter=450; nmxh=10; alpha="0.046e0"; }
+  { lelt=515000;lmor=19500000; refine_max=10; niter=2000; nmxh=10; alpha="0.046e0"; }
   else
   {
     printf("setparams: Internal error: invalid class type %c\n", class);
@@ -626,12 +626,12 @@ void write_ft_info(FILE *fp, char class)
    */
   int nx, ny, nz, maxdim, niter;
   if      (class == 'S') { nx = 64; ny = 64; nz = 64; niter = 6;}
-  else if (class == 'W') { nx = 128; ny = 128; nz = 32; niter = 450;}
-  else if (class == 'A') { nx = 256; ny = 256; nz = 128; niter = 450;}
-  else if (class == 'B') { nx = 512; ny = 256; nz = 256; niter =450;}
-  else if (class == 'C') { nx = 512; ny = 512; nz = 512; niter =450;}
-  else if (class == 'D') { nx = 2048; ny = 1024; nz = 1024; niter =450;}
-  else if (class == 'E') { nx = 4096; ny = 2048; nz = 2048; niter =450;}
+  else if (class == 'W') { nx = 128; ny = 128; nz = 32; niter = 2000;}
+  else if (class == 'A') { nx = 256; ny = 256; nz = 128; niter = 2000;}
+  else if (class == 'B') { nx = 512; ny = 256; nz = 256; niter =2000;}
+  else if (class == 'C') { nx = 512; ny = 512; nz = 512; niter =2000;}
+  else if (class == 'D') { nx = 2048; ny = 1024; nz = 1024; niter =2000;}
+  else if (class == 'E') { nx = 4096; ny = 2048; nz = 2048; niter =2000;}
   else {
     printf("setparams: Internal error: invalid class type %c\n", class);
     exit(1);
