@@ -67,7 +67,7 @@ void stop_searching(){
     }
 
     //Set High and Low for fluctuations when running the model
-    if(heuristic_mode == 15 && detection_mode == 2){
+    if( (heuristic_mode == 15 || heuristic_mode == 10) && detection_mode == 2){
 
     	high_threads = best_threads;
     	low_threads = best_threads;
@@ -454,8 +454,8 @@ void perform_fluctuation(double throughput, double power, long time){
 // This alternation allows to simulate a virtual configuration that has a power consumption as close as possible to the cap and increases the capability of adapting during noisy explorations 
 void dynamic_heuristic1(double throughput, double power){
 
-	update_high(throughput, power); 
-	update_low(throughput, power); 
+	//update_high(throughput, power); 
+	//update_low(throughput, power); 
 
 	// Call basic dynamic heuristic
 	dynamic_heuristic0(throughput, power);
