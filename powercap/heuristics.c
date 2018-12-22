@@ -67,7 +67,7 @@ void stop_searching(){
     }
 
     //Set High and Low for fluctuations when running the model
-    if( (heuristic_mode == 15 || heuristic_mode == 10) && detection_mode == 2){
+    if((heuristic_mode == 15 || heuristic_mode == 10 || heuristic_mode == 16 || heuristic_mode == 13) && detection_mode == 2){
 
     	high_threads = best_threads;
     	low_threads = best_threads;
@@ -867,6 +867,11 @@ void model_power_throughput(double throughput, double power){
 	} 
 }
 
+void baseline_enhanced(double throughput, double power){
+	heuristic_highest_threads(throughput, power);
+}
+
+
 char* subString (const char* input, int offset, int len, char* dest){
 	int input_len = strlen (input);
 	if (offset + len > input_len){
@@ -916,6 +921,10 @@ void heuristic(double throughput, double power, long time){
 			case 15:
 				model_power_throughput(throughput, power);
 				break;
+			case 16:
+				baseline_enhanced(throughput, power);
+				break;
+
 			default:
 				printf("Heuristic mode invalid\n");
 				exit(1);
@@ -1138,7 +1147,7 @@ void heuristic(double throughput, double power, long time){
 				max_thread_search_throughput = -1;
 			}
 
-			if((heuristic_mode == 10 || heuristic_mode == 15) && stopped_searching){
+			if((heuristic_mode == 10 || heuristic_mode == 15 || heuristic_mode == 13 || heuristic_mode == 16) && stopped_searching){
 				perform_fluctuation(throughput, power, time);
 			}
 		}
